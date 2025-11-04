@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Late Night Cart | {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Colors: V1 Olive + V2 Teal Accent */
+        :root {
+            --color-white: #fcfcfc;
+            --color-black: #0a0a0a;
+            --color-dark-olive: #373012;
+            --color-medium-olive: #64561a;
+            --color-bright-olive: #917c22;
+            --color-accent: #20c997; /* Vibrant Teal */
+        }
+        .bg-custom-accent { background-color: var(--color-accent); }
+        .text-custom-accent { color: var(--color-accent); }
+        .border-custom-accent { border-color: var(--color-accent); }
+        .hover\:bg-custom-accent:hover { background-color: #1aa079; }
+        .font-logo { font-family: 'Playfair Display', serif; font-weight: 700; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-custom-white text-custom-black min-h-screen flex flex-col">
+
+    <nav class="bg-custom-black text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-10">
+        <a href="{{ url_for('home') }}" class="text-2xl font-logo">
+            <span class="text-custom-bright-olive">Late</span> Night Cart
+        </a>
+        <div class="flex items-center space-x-4">
+            {% if session.get('logged_in') %}
+                <span class="text-sm text-gray-300 hidden sm:inline">Hello, {{ session.get('username') }}</span>
+                {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="text-custom-accent hover:text-white text-sm font-semibold">Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('snacks') }}" class="text-custom-accent hover:text-white text-sm font-semibold">Browse Snacks</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm font-semibold">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="bg-custom-accent hover:bg-green-600 text-black py-1 px-3 rounded text-sm font-semibold">Login</a>
+                <a href="{{ url_for('register') }}" class="text-gray-300 hover:text-white text-sm font-semibold">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-4 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3 mb-3 rounded-md text-sm font-medium border
+                        {% if category == 'success' %} bg-green-100 text-green-800 border-green-400
+                        {% elif category == 'danger' %} bg-red-100 text-red-800 border-red-400
+                        {% elif category == 'info' %} bg-blue-100 text-blue-800 border-blue-400
+                        {% else %} bg-yellow-100 text-yellow-800 border-yellow-400 {% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="py-4 text-center text-sm text-custom-medium-olive border-t border-gray-200 mt-8">
+        <p>&copy; 2025 Late Night Cart. CVR College of Engineering.</p>
+    </footer>
+
+</body>
+</html>

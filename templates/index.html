@@ -1,60 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Late Night Cart - Snacks that don't sleep 🍪</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
-    <style>
-        /* [Copy the custom colors and font styles from the previous HTML response here] */
-        :root {
-            --color-white: #fcfcfc;
-            --color-black: #0a0a0a;
-            --color-dark-olive: #373012;
-            --color-medium-olive: #64561a;
-            --color-bright-olive: #917c22;
-        }
+{% extends "base.html" %}
 
-        .bg-custom-white { background-color: var(--color-white); }
-        .text-custom-black { color: var(--color-black); }
-        .bg-custom-dark-olive { background-color: var(--color-dark-olive); }
-        .bg-custom-medium-olive { background-color: var(--color-medium-olive); }
-        .bg-custom-bright-olive { background-color: var(--color-bright-olive); }
-        .text-custom-bright-olive { color: var(--color-bright-olive); }
-        .font-logo { font-family: 'Playfair Display', serif; font-weight: 700; }
-        .font-tagline { font-family: 'Georgia', serif; }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-</head>
-<body class="bg-custom-white text-custom-black min-h-screen flex flex-col justify-between">
+{% block title %}Home{% endblock %}
 
-    <header class="py-6 px-4">
-        <div class="container mx-auto flex justify-center">
-            <a href="{{ url_for('home') }}" class="text-3xl sm:text-4xl md:text-5xl font-logo">
-                <span class="text-custom-black">Late</span>
-                <span class="text-custom-bright-olive">Night</span>
-                <span class="text-custom-black block mt-1 text-2xl">Cart</span>
-            </a>
+{% block content %}
+<div class="flex-grow flex items-center justify-center p-4">
+    <div class="text-center">
+        <p class="text-lg sm:text-xl md:text-2xl font-tagline mb-8 text-custom-black">Snacks that don’t sleep 🍪</p>
+
+        <div class="w-full max-w-2xl mx-auto h-48 sm:h-64 md:h-80 bg-gradient-to-br from-custom-medium-olive to-custom-dark-olive rounded-lg shadow-xl flex items-center justify-center p-4 mb-10">
+            <p class="text-custom-white text-lg font-semibold">Serving the CVR Hostel, one byte at a time.</p>
         </div>
-    </header>
 
-    <main class="flex-grow flex items-center justify-center p-4">
-        <div class="text-center">
-            <p class="text-lg sm:text-xl md:text-2xl font-tagline mb-8 text-custom-black">Snacks that don’t sleep 🍪</p>
-
-            <div class="w-full max-w-2xl mx-auto h-48 sm:h-64 md:h-80 bg-gradient-to-br from-custom-medium-olive to-custom-dark-olive rounded-lg shadow-xl flex items-center justify-center p-4 mb-10">
-                <p class="text-custom-white text-lg font-semibold">Your delicious snacks await!</p>
-            </div>
-
-            <a href="{{ url_for('snacks') }}" class="inline-block bg-custom-bright-olive text-custom-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-opacity-90 transition duration-300 text-lg">
-                Browse Snacks
-            </a>
-        </div>
-    </main>
-
-    <footer class="py-4 text-center text-sm text-custom-medium-olive">
-        <p>&copy; 2025 Late Night Cart. Powered by Flask.</p>
-    </footer>
-
-</body>
-</html>
+        <a href="{{ url_for('login') }}" class="inline-block bg-custom-accent text-black font-bold py-3 px-8 rounded-lg shadow-md hover:bg-green-600 transition duration-300 text-lg">
+            Start Ordering
+        </a>
+    </div>
+</div>
+{% endblock %}
