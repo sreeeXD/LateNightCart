@@ -1,0 +1,14 @@
+# Dependencies
+/node_modules
+/venv
+
+# Build files (if using Tailwind CLI)
+/dist
+
+# OS generated files
+.DS_Store
+
+# Python specific (for Flask/database)
+__pycache__/
+*.pyc
+db.sqlite3 # Your SQLite database file
