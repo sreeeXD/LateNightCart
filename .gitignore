@@ -12,3 +12,7 @@
 __pycache__/
 *.pyc
 db.sqlite3 # Your SQLite database file
+/venv
+*.pyc
+__pycache__/
+site.db
