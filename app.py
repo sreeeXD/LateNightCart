@@ -12,12 +12,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'a_very_secret_and_long_key_for_cvr_hostel'
 
-# Upload settings
-UPLOAD_FOLDER = os.path.join('static', 'uploads')
+# --- Upload settings ---
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 db = SQLAlchemy(app)
 
 # --- DATABASE MODELS ---
@@ -187,7 +188,6 @@ def admin_dashboard():
     orders = Order.query.order_by(Order.order_time.desc()).all()
     return render_template('admin_dashboard.html', snacks=snacks, orders=orders)
 
-
 @app.route("/manage_snack", methods=['GET', 'POST'])
 @admin_required
 def manage_snack():
@@ -197,10 +197,12 @@ def manage_snack():
         quantity = int(request.form.get('quantity'))
         image_file = request.files.get('image')
 
-        image_url = '/static/images/default.jpg'
+        image_url = '/static/images/default.jpg'  # fallback
+
         if image_file and allowed_file(image_file.filename):
             filename = secure_filename(image_file.filename)
             save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print("Saving file to:", save_path)  # ✅ Debug line
             image_file.save(save_path)
             image_url = f"/static/uploads/{filename}"
 
@@ -238,20 +240,35 @@ def edit_snack(snack_id):
 
     return render_template('edit_snack.html', snack=snack)
 
-
 @app.route("/delete_snack/<int:snack_id>")
 @admin_required
 def delete_snack(snack_id):
     snack = Snack.query.get_or_404(snack_id)
+
+    # If the snack has existing orders, don't delete it
+    if snack.orders:
+        snack.is_available = False
+        db.session.commit()
+        flash(f"Snack '{snack.name}' has existing orders and was marked as unavailable instead of deleted.", 'warning')
+        return redirect(url_for('manage_snack'))
+
+    # Otherwise, safe to delete (no orders depend on it)
     if snack.image_url and snack.image_url.startswith('/static/uploads/'):
         try:
-            os.remove(snack.image_url.lstrip('/'))
-        except Exception:
-            pass
+            full_path = os.path.join(BASE_DIR, snack.image_url.lstrip('/'))
+            if os.path.exists(full_path):
+                os.remove(full_path)
+        except Exception as e:
+            print("⚠️ Error deleting image file:", e)
 
-    db.session.delete(snack)
-    db.session.commit()
-    flash(f"Snack '{snack.name}' deleted successfully!", 'success')
+    try:
+        db.session.delete(snack)
+        db.session.commit()
+        flash(f"Snack '{snack.name}' deleted successfully!", 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting snack: {e}", 'danger')
+
     return redirect(url_for('manage_snack'))
 
 
@@ -263,6 +280,34 @@ def complete_order(order_id):
     db.session.commit()
     flash(f"Order #{order.id} marked as completed.", 'success')
     return redirect(url_for('admin_dashboard'))
+
+# --- SITE ACCESS CONTROL ---
+ACCESS_KEYWORD = "latenightcart"  # change this to whatever secret you want
+
+@app.before_request
+def check_site_access():
+    """Redirect users to /access unless they have entered the correct keyword."""
+    # Allow these pages without restriction:
+    allowed_routes = ['access', 'site_locked', 'static']
+    if request.endpoint not in allowed_routes:
+        if 'access_granted' not in session:
+            return redirect(url_for('access'))
+
+@app.route("/access", methods=["GET", "POST"])
+def access():
+    if request.method == "POST":
+        keyword = request.form.get("keyword", "").strip().lower()
+        if keyword == ACCESS_KEYWORD.lower():
+            session['access_granted'] = True
+            flash("✅ Access granted! Welcome to LateNightCart.", "success")
+            return redirect(url_for("home"))
+        else:
+            return redirect(url_for("site_locked"))
+    return render_template("access.html")
+
+@app.route("/site_locked")
+def site_locked():
+    return render_template("site_locked.html")
 
 
 # --- MAIN ---
