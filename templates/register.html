@@ -1,38 +1,74 @@
 {% extends "base.html" %}
-
-{% block title %}Register{% endblock %}
-
+{% block title %}Register - LateNightCart{% endblock %}
 {% block content %}
-<div class="flex items-center justify-center pt-16">
-    <div class="w-full max-w-sm p-8 bg-white rounded-lg shadow-2xl border border-custom-dark-olive">
-        <h2 class="text-3xl font-bold text-center mb-6 text-custom-black">Student Sign Up</h2>
-        
-        <form method="POST" action="{{ url_for('register') }}">
-            
-            <div class="mb-4">
-                <label for="username" class="block text-sm font-medium text-custom-black mb-1">First Name (Username)</label>
-                <input type="text" id="username" name="username" placeholder="e.g., Sree" required class="w-full p-3 border border-gray-300 rounded-md focus:border-custom-accent focus:ring-custom-accent">
-            </div>
 
-            <div class="mb-4">
-                <label for="room_number" class="block text-sm font-medium text-custom-black mb-1">Room Number</label>
-                <input type="text" id="room_number" name="room_number" placeholder="e.g., A301" required class="w-full p-3 border border-gray-300 rounded-md focus:border-custom-accent focus:ring-custom-accent">
-                <p class="text-xs text-gray-500 mt-1">Your login will be (Name)-(Room Number)</p>
-            </div>
+<section class="flex justify-center items-center min-h-[80vh] px-4">
+  <div class="bg-gray-800/80 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-md mt-10">
+    <h2 class="text-3xl font-extrabold text-center text-yellow-400 mb-6 glow-text">
+      Create Your Account
+    </h2>
 
-            <div class="mb-6">
-                <label for="password" class="block text-sm font-medium text-custom-black mb-1">Create Password</label>
-                <input type="password" id="password" name="password" required class="w-full p-3 border border-gray-300 rounded-md focus:border-custom-accent focus:ring-custom-accent">
-            </div>
+    <form method="POST" action="/register" class="space-y-5">
+      <!-- Username -->
+      <div>
+        <label for="username" class="block text-sm text-gray-300 mb-2">Username</label>
+        <input type="text" name="username" id="username" placeholder="e.g. srivardhan"
+               class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white"
+               required>
+      </div>
 
-            <button type="submit" class="w-full bg-custom-accent text-black font-bold py-3 rounded-md shadow-md hover:bg-green-600 transition duration-300">
-                Register
-            </button>
-        </form>
+      <!-- Room Number -->
+      <div>
+        <label for="room_number" class="block text-sm text-gray-300 mb-2">Room Number</label>
+        <input type="text" name="room_number" id="room_number" placeholder="e.g. B204"
+               class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white"
+               required>
+      </div>
 
-        <p class="text-center mt-6 text-sm text-custom-medium-olive">
-            Already registered? <a href="{{ url_for('login') }}" class="text-custom-accent hover:underline font-semibold">Sign In</a>
-        </p>
-    </div>
-</div>
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm text-gray-300 mb-2">Password</label>
+        <input type="password" name="password" id="password" placeholder="••••••••"
+               class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white"
+               required>
+      </div>
+
+      <!-- Confirm Password -->
+      <div>
+        <label for="confirm_password" class="block text-sm text-gray-300 mb-2">Confirm Password</label>
+        <input type="password" id="confirm_password" placeholder="Re-enter password"
+               class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white"
+               required>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit"
+              class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2 rounded-lg transition duration-200">
+        Register
+      </button>
+    </form>
+
+    <p class="text-center text-sm mt-6 text-gray-400">
+      Already have an account?
+      <a href="{{ url_for('login') }}" class="text-yellow-400 hover:underline">Login here</a>
+    </p>
+  </div>
+</section>
+
+<script>
+  // Basic client-side validation for matching passwords
+  document.querySelector("form").addEventListener("submit", function(e) {
+    const pwd = document.getElementById("password").value;
+    const confirmPwd = document.getElementById("confirm_password").value;
+    if (pwd !== confirmPwd) {
+      e.preventDefault();
+      alert("Passwords do not match!");
+    }
+  });
+</script>
+
 {% endblock %}

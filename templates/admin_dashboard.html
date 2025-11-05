@@ -1,74 +1,101 @@
 {% extends "base.html" %}
-
-{% block title %}Admin Dashboard{% endblock %}
-
+{% block title %}Admin Dashboard - LateNightCart{% endblock %}
 {% block content %}
-<div class="container mx-auto p-4 py-8">
-    <h1 class="text-4xl font-bold mb-8 text-center text-custom-black">Admin Dashboard</h1>
 
-    <h2 class="text-3xl font-semibold mb-4 border-b border-custom-medium-olive pb-2">📦 Pending Orders ({{ pending_orders|length }})</h2>
-    <div class="mb-10 space-y-4">
-        {% for order in pending_orders %}
-        <div class="p-4 bg-gray-50 border-l-4 border-custom-accent shadow-sm flex justify-between items-center">
-            <div>
-                <p class="text-lg font-bold">{{ order.quantity_ordered }}x {{ order.snack.name }}</p>
-                <p class="text-sm text-custom-black">
-                    **{{ order.buyer_name }}** (Room: **{{ order.room_number }}**)
-                </p>
-                <p class="text-xs text-gray-500 mt-1">
-                    Ordered: {{ order.order_time.strftime('%I:%M %p, %b %d') }}
-                </p>
-            </div>
-            <a href="{{ url_for('complete_order', order_id=order.id) }}" class="bg-green-600 text-white py-1 px-3 rounded text-sm hover:bg-green-700 transition font-semibold">
+<section class="px-4 md:px-10 pt-24 pb-16 min-h-screen">
+  <!-- Dashboard Header -->
+  <div class="text-center mb-10">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-yellow-400 glow-text mb-2">Admin Dashboard</h1>
+    <p class="text-gray-400">Manage your snacks, orders, and users with ease.</p>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div class="bg-gray-800/80 border border-gray-700 rounded-2xl p-6 text-center shadow-lg hover:shadow-yellow-500/20 transition">
+      <h3 class="text-gray-400 text-sm uppercase">Total Snacks</h3>
+      <p class="text-3xl font-bold text-yellow-400 mt-2">{{ snacks|length }}</p>
+    </div>
+
+    <div class="bg-gray-800/80 border border-gray-700 rounded-2xl p-6 text-center shadow-lg hover:shadow-yellow-500/20 transition">
+      <h3 class="text-gray-400 text-sm uppercase">Total Orders</h3>
+      <p class="text-3xl font-bold text-yellow-400 mt-2">{{ orders|length if orders else 0 }}</p>
+    </div>
+
+    <div class="bg-gray-800/80 border border-gray-700 rounded-2xl p-6 text-center shadow-lg hover:shadow-yellow-500/20 transition">
+      <h3 class="text-gray-400 text-sm uppercase">Pending Orders</h3>
+      <p class="text-3xl font-bold text-yellow-400 mt-2">
+        {{ orders|selectattr("status", "equalto", "Pending")|list|length if orders else 0 }}
+      </p>
+    </div>
+
+    <div class="bg-gray-800/80 border border-gray-700 rounded-2xl p-6 text-center shadow-lg hover:shadow-yellow-500/20 transition">
+      <h3 class="text-gray-400 text-sm uppercase">Completed Orders</h3>
+      <p class="text-3xl font-bold text-yellow-400 mt-2">
+        {{ orders|selectattr("status", "equalto", "Completed")|list|length if orders else 0 }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Actions -->
+  <div class="flex flex-wrap justify-center gap-6 mb-10">
+    <a href="{{ url_for('manage_snack') }}" 
+       class="px-6 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition shadow-lg">
+      🥨 Manage Snacks
+    </a>
+    <a href="{{ url_for('snacks') }}" 
+       class="px-6 py-3 bg-gray-700 text-yellow-400 font-semibold rounded-lg hover:bg-gray-600 transition shadow-lg">
+      👀 View as Customer
+    </a>
+  </div>
+
+  <!-- Recent Orders Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-gray-900/60 border border-gray-700 rounded-2xl shadow-lg">
+      <thead class="bg-gray-800 border-b border-gray-700">
+        <tr>
+          <th class="text-left text-yellow-400 py-3 px-4">Order ID</th>
+          <th class="text-left text-yellow-400 py-3 px-4">Snack</th>
+          <th class="text-left text-yellow-400 py-3 px-4">Buyer</th>
+          <th class="text-left text-yellow-400 py-3 px-4">Room</th>
+          <th class="text-left text-yellow-400 py-3 px-4">Quantity</th>
+          <th class="text-left text-yellow-400 py-3 px-4">Status</th>
+          <th class="text-left text-yellow-400 py-3 px-4">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if orders %}
+          {% for order in orders %}
+          <tr class="border-b border-gray-700 hover:bg-gray-800/70 transition">
+            <td class="py-3 px-4 text-gray-300">{{ order.id }}</td>
+            <td class="py-3 px-4 text-gray-300">{{ order.snack.name }}</td>
+            <td class="py-3 px-4 text-gray-300">{{ order.buyer_name }}</td>
+            <td class="py-3 px-4 text-gray-300">{{ order.room_number }}</td>
+            <td class="py-3 px-4 text-gray-300">{{ order.quantity_ordered }}</td>
+            <td class="py-3 px-4">
+              {% if order.status == "Completed" %}
+                <span class="bg-green-600/60 text-white px-2 py-1 rounded-lg text-sm">Completed</span>
+              {% else %}
+                <span class="bg-yellow-600/60 text-white px-2 py-1 rounded-lg text-sm">Pending</span>
+              {% endif %}
+            </td>
+            <td class="py-3 px-4">
+              {% if order.status == "Pending" %}
+              <a href="{{ url_for('complete_order', order_id=order.id) }}" 
+                 class="bg-green-500 hover:bg-green-400 text-black px-3 py-1 rounded-lg text-sm font-semibold transition">
                 Mark Done
-            </a>
-        </div>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
         {% else %}
-        <p class="text-gray-500">No pending orders right now. Time to rest!</p>
-        {% endfor %}
-    </div>
-
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-3xl font-semibold border-b border-custom-medium-olive pb-2">🍪 Current Inventory</h2>
-        <a href="{{ url_for('manage_snack') }}" class="bg-custom-accent text-black py-2 px-4 rounded-md hover:bg-green-600 transition duration-300 text-sm font-semibold">
-            + Add New Snack
-        </a>
-    </div>
-    
-    <table class="min-w-full bg-white border border-custom-dark-olive">
-        <thead>
-            <tr class="bg-custom-medium-olive text-white">
-                <th class="py-2 px-4 text-left">Snack Name</th>
-                <th class="py-2 px-4 text-left">Price (₹)</th>
-                <th class="py-2 px-4 text-left">Qty Left</th>
-                <th class="py-2 px-4 text-center">Status</th>
-                <th class="py-2 px-4 text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for snack in inventory %}
-            <tr class="border-b border-gray-200 hover:bg-gray-50">
-                <td class="py-3 px-4">{{ snack.name }}</td>
-                <td class="py-3 px-4 text-custom-bright-olive font-bold">{{ "%.2f"|format(snack.price) }}</td>
-                <td class="py-3 px-4 {% if snack.quantity < 5 %} text-red-600 font-semibold {% endif %}">{{ snack.quantity }}</td>
-                <td class="py-3 px-4 text-center">
-                    <span class="px-2 py-1 text-xs rounded-full {% if snack.is_available %} bg-green-200 text-green-800 {% else %} bg-red-200 text-red-800 {% endif %}">
-                        {{ 'Available' if snack.is_available else 'Sold Out' }}
-                    </span>
-                </td>
-                <td class="py-3 px-4 text-center">
-                    <a href="{{ url_for('manage_snack', snack_id=snack.id) }}" class="text-custom-black hover:text-custom-accent text-sm font-semibold mr-3">
-                        Edit
-                    </a>
-                    <form method="POST" action="{{ url_for('delete_snack', snack_id=snack.id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete {{ snack.name }}?');">
-                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-semibold">
-                            Delete
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+          <tr>
+            <td colspan="7" class="text-center text-gray-400 py-6">No orders yet 🍪</td>
+          </tr>
+        {% endif %}
+      </tbody>
     </table>
-</div>
+  </div>
+</section>
+
 {% endblock %}

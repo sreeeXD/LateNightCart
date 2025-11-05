@@ -1,73 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Late Night Cart | {% block title %}{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom Colors: V1 Olive + V2 Teal Accent */
-        :root {
-            --color-white: #fcfcfc;
-            --color-black: #0a0a0a;
-            --color-dark-olive: #373012;
-            --color-medium-olive: #64561a;
-            --color-bright-olive: #917c22;
-            --color-accent: #20c997; /* Vibrant Teal */
-        }
-        .bg-custom-accent { background-color: var(--color-accent); }
-        .text-custom-accent { color: var(--color-accent); }
-        .border-custom-accent { border-color: var(--color-accent); }
-        .hover\:bg-custom-accent:hover { background-color: #1aa079; }
-        .font-logo { font-family: 'Playfair Display', serif; font-weight: 700; }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}LateNightCart{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* LateNightCart Glow Effect */
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px #facc15, 0 0 20px #facc15, 0 0 40px #facc15; }
+      50% { text-shadow: 0 0 20px #fcd34d, 0 0 30px #fde68a, 0 0 60px #facc15; }
+    }
+    .glow-text { animation: glow 3s infinite ease-in-out; }
+
+    /* Flash message fade animation */
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; display: none; }
+    }
+    .fade-out {
+      animation: fadeOut 1s ease-in-out 3s forwards;
+    }
+
+    /* Smooth scroll globally */
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
 </head>
-<body class="bg-custom-white text-custom-black min-h-screen flex flex-col">
 
-    <nav class="bg-custom-black text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-10">
-        <a href="{{ url_for('home') }}" class="text-2xl font-logo">
-            <span class="text-custom-bright-olive">Late</span> Night Cart
-        </a>
-        <div class="flex items-center space-x-4">
-            {% if session.get('logged_in') %}
-                <span class="text-sm text-gray-300 hidden sm:inline">Hello, {{ session.get('username') }}</span>
-                {% if session.get('role') == 'admin' %}
-                    <a href="{{ url_for('admin_dashboard') }}" class="text-custom-accent hover:text-white text-sm font-semibold">Dashboard</a>
-                {% else %}
-                    <a href="{{ url_for('snacks') }}" class="text-custom-accent hover:text-white text-sm font-semibold">Browse Snacks</a>
-                {% endif %}
-                <a href="{{ url_for('logout') }}" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm font-semibold">Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="bg-custom-accent hover:bg-green-600 text-black py-1 px-3 rounded text-sm font-semibold">Login</a>
-                <a href="{{ url_for('register') }}" class="text-gray-300 hover:text-white text-sm font-semibold">Register</a>
-            {% endif %}
-        </div>
-    </nav>
+<body class="bg-gradient-to-b from-gray-900 via-black to-gray-950 text-white min-h-screen flex flex-col">
 
-    <div class="container mx-auto mt-4 px-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="p-3 mb-3 rounded-md text-sm font-medium border
-                        {% if category == 'success' %} bg-green-100 text-green-800 border-green-400
-                        {% elif category == 'danger' %} bg-red-100 text-red-800 border-red-400
-                        {% elif category == 'info' %} bg-blue-100 text-blue-800 border-blue-400
-                        {% else %} bg-yellow-100 text-yellow-800 border-yellow-400 {% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+  <!-- Navbar (Shrinks on scroll, shown on all pages) -->
+  <nav id="main-nav" class="fixed top-0 left-0 w-full bg-black/30 backdrop-blur-md z-50 border-b border-gray-800">
+    <div class="flex justify-between items-center px-6 py-3">
+      <a href="{{ url_for('home') }}" class="text-2xl font-extrabold text-yellow-400 glow-text hover:text-yellow-300 transition-all">
+        LateNightCart
+      </a>
+
+      <div class="space-x-4 text-gray-300 text-sm">
+        {% if session.get('logged_in') %}
+          <a href="{{ url_for('snacks') }}" class="hover:text-yellow-400">Snacks</a>
+          {% if session.get('role') == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}" class="hover:text-yellow-400">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}" class="hover:text-yellow-400">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="hover:text-yellow-400">Login</a>
+          <a href="{{ url_for('register') }}" class="hover:text-yellow-400">Register</a>
+        {% endif %}
+      </div>
     </div>
+  </nav>
 
-    <main class="flex-grow">
-        {% block content %}{% endblock %}
-    </main>
+  <!-- Flash Messages -->
+  <div class="fixed top-16 left-1/2 transform -translate-x-1/2 z-40 w-11/12 md:w-1/2">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="fade-out text-center px-4 py-3 rounded-lg mb-3
+                      {% if category == 'success' %}bg-green-600/80{% elif category == 'danger' %}bg-red-600/80
+                      {% elif category == 'warning' %}bg-yellow-500/80{% else %}bg-gray-700/80{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
-    <footer class="py-4 text-center text-sm text-custom-medium-olive border-t border-gray-200 mt-8">
-        <p>&copy; 2025 Late Night Cart. CVR College of Engineering.</p>
-    </footer>
+  <!-- Page-Specific Content -->
+  <main class="flex-grow pt-20 pb-10">
+    {% block content %}{% endblock %}
+  </main>
 
-</body>
-</html>
+  <!-- Footer -->
+  <footer class="text-center text-gray-500 text-sm py-5 borde

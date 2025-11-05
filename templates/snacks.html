@@ -1,32 +1,100 @@
 {% extends "base.html" %}
-
-{% block title %}Snack Menu{% endblock %}
-
 {% block content %}
-<div class="container mx-auto p-4 py-8">
-    <h1 class="text-4xl font-bold text-center mb-10 text-custom-black">Our Delicious Snacks</h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {% for snack in snacks %}
-            {% set is_sold_out = not snack.is_available or snack.quantity == 0 %}
-            <div class="bg-custom-white border border-custom-dark-olive rounded-lg shadow-md overflow-hidden transition-shadow duration-300 {% if is_sold_out %} opacity-60 {% else %} hover:shadow-lg {% endif %}">
-                <img src="{{ snack.image_url }}" alt="{{ snack.name }}" class="w-full h-48 object-cover {% if is_sold_out %} grayscale {% endif %}">
-                <div class="p-4">
-                    <h2 class="text-xl font-semibold text-custom-black mb-2">{{ snack.name }}</h2>
-                    <p class="text-custom-bright-olive text-lg font-bold mb-2">₹ {{ "%.2f"|format(snack.price) }}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snacks - LateNightCart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px #facc15, 0 0 20px #facc15, 0 0 40px #facc15; }
+      50% { text-shadow: 0 0 20px #fcd34d, 0 0 30px #fde68a, 0 0 60px #facc15; }
+    }
+    .glow-text { animation: glow 3s infinite ease-in-out; }
 
-                    {% if is_sold_out %}
-                        <p class="text-red-600 text-sm mb-4 font-semibold">Sold Out!</p>
-                        <button class="w-full bg-gray-400 text-white py-2 rounded-md cursor-not-allowed" disabled>Order</button>
-                    {% else %}
-                        <p class="text-custom-medium-olive text-sm mb-4">Quantity available: <span class="font-semibold">{{ snack.quantity }}</span></p>
-                        <a href="{{ url_for('order', snack_id=snack.id) }}" class="w-full bg-custom-accent text-black py-2 rounded-md hover:bg-green-600 transition duration-300 block text-center font-semibold">
-                            Order Now
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
+    #navbar {
+      transition: all 0.4s ease-in-out;
+    }
+    .shrink {
+      transform: scale(0.7);
+      top: 0.5rem;
+      left: 1rem;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-b from-gray-900 via-black to-gray-950 text-white min-h-screen flex flex-col items-center relative">
+
+  <!-- Navbar / Logo -->
+  <header id="navbar" class="fixed top-1/4 md:top-1/3 text-center w-full z-50 transition-all duration-500">
+    <h1 id="title" class="text-5xl md:text-6xl font-extrabold glow-text transition-all duration-500">
+      LateNightCart
+    </h1>
+  </header>
+
+  <!-- Snacks Section -->
+  <section id="snack-section" class="pt-48 md:pt-64 px-4 md:px-10 w-full">
+    <h2 class="text-center text-2xl md:text-3xl font-semibold mb-10 text-yellow-400">Available Snacks</h2>
+
+    {% if snacks %}
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
+      {% for snack in snacks %}
+      <div class="bg-gray-800/80 backdrop-blur-lg p-5 rounded-2xl shadow-lg border border-gray-700 hover:scale-105 hover:shadow-yellow-500/20 transition duration-300 w-72">
+        <img src="{{ snack.image_url or '/static/images/default.jpg' }}" alt="{{ snack.name }}" 
+             class="rounded-xl w-full h-40 object-cover mb-4 border border-gray-700">
+        <h3 class="text-xl font-bold text-yellow-400 mb-2">{{ snack.name }}</h3>
+        <p class="text-gray-300 mb-1">₹{{ '%.2f' | format(snack.price) }}</p>
+        <p class="text-gray-400 text-sm mb-4">Available: {{ snack.quantity }}</p>
+
+        {% if snack.is_available %}
+        <a href="{{ url_for('order', snack_id=snack.id) }}"
+           class="block text-center bg-yellow-500 text-black font-semibold py-2 rounded-lg hover:bg-yellow-400 transition duration-200">
+          Order Now
+        </a>
+        {% else %}
+        <button disabled class="block text-center bg-gray-600 text-gray-300 font-semibold py-2 rounded-lg cursor-not-allowed">
+          Out of Stock
+        </button>
+        {% endif %}
+      </div>
+      {% endfor %}
     </div>
-</div>
+    {% else %}
+    <p class="text-center text-gray-400 mt-20">No snacks available right now 😴</p>
+    {% endif %}
+  </section>
+
+  <!-- Back to Top Button -->
+  <button id="topButton" class="hidden fixed bottom-6 right-6 bg-yellow-500 text-black p-3 rounded-full shadow-lg hover:bg-yellow-400 transition">
+    ↑
+  </button>
+
+  <script>
+    // Shrink logo and move to top when scrolled
+    window.addEventListener("scroll", () => {
+      const navbar = document.getElementById("navbar");
+      const topButton = document.getElementById("topButton");
+      if (window.scrollY > 60) {
+        navbar.classList.add("shrink");
+        navbar.classList.remove("top-1/4", "text-center");
+        navbar.classList.add("top-5", "left-5", "absolute");
+        topButton.classList.remove("hidden");
+      } else {
+        navbar.classList.remove("shrink", "top-5", "left-5");
+        navbar.classList.add("top-1/4", "text-center");
+        topButton.classList.add("hidden");
+      }
+    });
+
+    // Smooth scroll to top
+    document.getElementById("topButton").addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>
+
 {% endblock %}
